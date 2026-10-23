@@ -1,0 +1,11 @@
+name: ci
+on: [push, workflow_dispatch]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.24' }
+      - run: go mod tidy
+      - run: go run .   # stderr (with the INFO log) is captured into the PUBLIC Actions log
