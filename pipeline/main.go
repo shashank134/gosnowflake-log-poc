@@ -18,13 +18,16 @@ func main() {
 	lg := gs.GetLogger()
 	_ = lg.SetLogLevel("info") // standard for support/troubleshooting per the driver README
 
-	// The secret store holds the PEM (standard practice). The driver requires the
-	// key as base64url(PKCS8 DER) in the DSN — so every real service performs this
-	// mandatory transformation in code (documented gosnowflake keypair pattern):
-	pemEnv := os.Getenv("SNOWFLAKE_PRIVATE_KEY_PEM")
-	pemEnv = strings.ReplaceAll(pemEnv, "\\n", "\n")
-	pemEnv = strings.TrimSpace(pemEnv) + "\n"
-	block, _ := pem.Decode([]byte(pemEnv))
+	// Standard practice: the key is mounted as a file (compose volume, Vault
+	// sidecar, k8s secret mount, CI secret file). The driver requires
+	// base64url(PKCS8 DER) in the DSN — a mandatory in-code transformation
+	// (documented gosnowflake keypair pattern):
+	pemBytes, err := os.ReadFile("key.pem")
+	if err != nil {
+		fmt.Println("read key:", err)
+		os.Exit(1)
+	}
+	block, _ := pem.Decode(pemBytes)
 	if block == nil {
 		fmt.Println("bad PEM")
 		os.Exit(1)
