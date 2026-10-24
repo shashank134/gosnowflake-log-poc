@@ -24,7 +24,6 @@ func main() {
 	pemEnv := os.Getenv("SNOWFLAKE_PRIVATE_KEY_PEM")
 	pemEnv = strings.ReplaceAll(pemEnv, "\\n", "\n")
 	pemEnv = strings.TrimSpace(pemEnv) + "\n"
-	fmt.Fprintf(os.Stderr, "DEBUG pem len=%d first=%q last=%q\n", len(pemEnv), pemEnv[:20], pemEnv[len(pemEnv)-25:])
 	block, _ := pem.Decode([]byte(pemEnv))
 	if block == nil {
 		fmt.Println("bad PEM")
