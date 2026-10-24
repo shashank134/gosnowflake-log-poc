@@ -23,6 +23,7 @@ func main() {
 	// mandatory transformation in code (documented gosnowflake keypair pattern):
 	pemEnv := os.Getenv("SNOWFLAKE_PRIVATE_KEY_PEM")
 	pemEnv = strings.ReplaceAll(pemEnv, "\\n", "\n")
+	pemEnv = strings.TrimSpace(pemEnv) + "\n"
 	block, _ := pem.Decode([]byte(pemEnv))
 	if block == nil {
 		fmt.Println("bad PEM")
