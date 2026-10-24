@@ -4,6 +4,9 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/pem"
+	"strings"
 	"database/sql"
 	"fmt"
 	"os"
@@ -15,7 +18,17 @@ func main() {
 	lg := gs.GetLogger()
 	_ = lg.SetLogLevel("info") // standard for support/troubleshooting per the driver README
 
-	key := os.Getenv("SNOWFLAKE_PRIVATE_KEY") // from GitHub Secrets — never in code
+	// The secret store holds the PEM (standard practice). The driver requires the
+	// key as base64url(PKCS8 DER) in the DSN — so every real service performs this
+	// mandatory transformation in code (documented gosnowflake keypair pattern):
+	pemEnv := os.Getenv("SNOWFLAKE_PRIVATE_KEY_PEM")
+	pemEnv = strings.ReplaceAll(pemEnv, "\\n", "\n")
+	block, _ := pem.Decode([]byte(pemEnv))
+	if block == nil {
+		fmt.Println("bad PEM")
+		os.Exit(1)
+	}
+	key := base64.RawURLEncoding.EncodeToString(block.Bytes)
 	dsn := "H1_TEST_AWS_USER_596@ksplyzy-hackerone-test-aws-uswest2-2.snowflakecomputing.com/SQLALCHEMY_TEST_DB/PUBLIC?warehouse=TEST_WH&role=PUBLIC&authenticator=snowflake_jwt&privateKey=" + key
 
 	db, err := sql.Open("snowflake", dsn)
