@@ -6,7 +6,6 @@ package main
 import (
 	"encoding/base64"
 	"encoding/pem"
-	"strings"
 	"database/sql"
 	"fmt"
 	"os"
